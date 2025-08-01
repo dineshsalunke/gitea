@@ -45,7 +45,7 @@ func TestAPICreateOrgProject(t *testing.T) {
 	templateType := project_model.TemplateTypeBasicKanban.ToString()
 
 	orgName := "org17"
-	token := getUserToken(t, "user2", auth_model.AccessTokenScopeWriteIssue, auth_model.AccessTokenScopeWriteOrganization)
+	token := getUserToken(t, "user2", auth_model.AccessTokenScopeWriteIssue, auth_model.AccessTokenScopeWriteOrganization, auth_model.AccessTokenScopeWriteProject)
 	urlStr := fmt.Sprintf("/api/v1/orgs/%s/projects", orgName)
 
 	req := NewRequestWithJSON(t, "POST", urlStr, &api.NewProjectOption{
@@ -70,7 +70,7 @@ func TestAPICreateRepoProject(t *testing.T) {
 
 	ownerName := "user2"
 	repoName := "repo1"
-	token := getUserToken(t, ownerName, auth_model.AccessTokenScopeWriteIssue, auth_model.AccessTokenScopeWriteOrganization)
+	token := getUserToken(t, ownerName, auth_model.AccessTokenScopeWriteIssue, auth_model.AccessTokenScopeWriteOrganization, auth_model.AccessTokenScopeWriteRepository, auth_model.AccessTokenScopeWriteProject)
 	urlStr := fmt.Sprintf("/api/v1/repos/%s/%s/projects", ownerName, repoName)
 
 	req := NewRequestWithJSON(t, "POST", urlStr, &api.NewProjectOption{
@@ -90,7 +90,7 @@ func TestAPICreateRepoProject(t *testing.T) {
 func TestAPIListUserProjects(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 
-	token := getUserToken(t, "user2", auth_model.AccessTokenScopeReadUser, auth_model.AccessTokenScopeReadIssue)
+	token := getUserToken(t, "user2", auth_model.AccessTokenScopeReadUser, auth_model.AccessTokenScopeReadIssue, auth_model.AccessTokenScopeReadProject)
 	link, _ := url.Parse("/api/v1/users/user2/projects")
 
 	req := NewRequest(t, "GET", link.String()).AddTokenAuth(token)
@@ -121,7 +121,7 @@ func TestAPIListRepoProjects(t *testing.T) {
 
 	ownerName := "user2"
 	repoName := "repo1"
-	token := getUserToken(t, "user2", auth_model.AccessTokenScopeReadRepository, auth_model.AccessTokenScopeReadIssue)
+	token := getUserToken(t, "user2", auth_model.AccessTokenScopeReadRepository, auth_model.AccessTokenScopeReadIssue, auth_model.AccessTokenScopeReadProject)
 	link, _ := url.Parse(fmt.Sprintf("/api/v1/repos/%s/%s/projects", ownerName, repoName))
 
 	req := NewRequest(t, "GET", link.String()).AddTokenAuth(token)
@@ -134,23 +134,30 @@ func TestAPIListRepoProjects(t *testing.T) {
 
 func TestAPIGetProject(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
-	token := getUserToken(t, "user2", auth_model.AccessTokenScopeReadProject)
-	link, _ := url.Parse(fmt.Sprintf("/api/v1/projects/%d", 4))
+
+	project_id := 4
+	user := "user2"
+	token := getUserToken(t, user, auth_model.AccessTokenScopeReadProject)
+	link, _ := url.Parse(fmt.Sprintf("/api/v1/projects/%d", project_id))
 
 	req := NewRequest(t, "GET", link.String()).AddTokenAuth(token)
 	var apiProject *api.Project
 
 	resp := MakeRequest(t, req, http.StatusOK)
 	DecodeJSON(t, resp, &apiProject)
-	assert.Equal(t, "First project", apiProject.Name)
-	assert.Equal(t, "repo1", apiProject.Repo.Name)
-	assert.Equal(t, "user2", apiProject.Creator.UserName)
+	assert.Equal(t, "project on user2", apiProject.Name)
+	assert.Equal(t, "individual", apiProject.Type)
+	assert.Equal(t, user, apiProject.Creator.UserName)
+	assert.EqualValues(t, project_id, apiProject.ID)
 }
 
 func TestAPIUpdateProject(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
-	token := getUserToken(t, "user2", auth_model.AccessTokenScopeWriteProject)
-	link, _ := url.Parse(fmt.Sprintf("/api/v1/projects/%d", 4))
+
+	project_id := 4
+	user := "user2"
+	token := getUserToken(t, user, auth_model.AccessTokenScopeWriteProject)
+	link, _ := url.Parse(fmt.Sprintf("/api/v1/projects/%d", project_id))
 
 	req := NewRequestWithJSON(t, "PATCH", link.String(), &api.UpdateProjectOption{Name: "First project updated"}).AddTokenAuth(token)
 
@@ -163,11 +170,14 @@ func TestAPIUpdateProject(t *testing.T) {
 
 func TestAPIDeleteProject(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
-	token := getUserToken(t, "user2", auth_model.AccessTokenScopeWriteProject)
-	link, _ := url.Parse(fmt.Sprintf("/api/v1/projects/%d", 4))
+
+	project_id := 4
+	user := "user2"
+	token := getUserToken(t, user, auth_model.AccessTokenScopeWriteProject)
+	link, _ := url.Parse(fmt.Sprintf("/api/v1/projects/%d", project_id))
 
 	req := NewRequest(t, "DELETE", link.String()).AddTokenAuth(token)
 
 	MakeRequest(t, req, http.StatusNoContent)
-	unittest.AssertNotExistsBean(t, &project_model.Project{ID: 1})
+	unittest.AssertNotExistsBean(t, &project_model.Project{ID: int64(project_id)})
 }
