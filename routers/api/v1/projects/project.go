@@ -146,7 +146,7 @@ func GetProject(ctx *context.APIContext) {
 	// produces:
 	// - application/json
 	// parameters:
-	//   - name: id
+	//   - name: project_id
 	//     in: path
 	//     description: id of the project
 	//     type: string
@@ -158,7 +158,7 @@ func GetProject(ctx *context.APIContext) {
 	//    "$ref": "#/responses/forbidden"
 	//  "404":
 	//    "$ref": "#/responses/notFound"
-	project, err := project_model.GetProjectByID(ctx, ctx.FormInt64("project_id"))
+	project, err := project_model.GetProjectByID(ctx, ctx.PathParamInt64("project_id"))
 	if err != nil {
 		if project_model.IsErrProjectNotExist(err) {
 			ctx.APIError(http.StatusNotFound, err)
@@ -185,7 +185,7 @@ func UpdateProject(ctx *context.APIContext) {
 	// consumes:
 	// - application/json
 	// parameters:
-	//   - name: id
+	//   - name: project_id
 	//     in: path
 	//     description: id of the project
 	//     type: string
@@ -202,7 +202,7 @@ func UpdateProject(ctx *context.APIContext) {
 	//  "404":
 	//    "$ref": "#/responses/notFound"
 	form := web.GetForm(ctx).(*api.UpdateProjectOption)
-	project, err := project_model.GetProjectByID(ctx, ctx.FormInt64("project_id"))
+	project, err := project_model.GetProjectByID(ctx, ctx.PathParamInt64("project_id"))
 	if err != nil {
 		if project_model.IsErrProjectNotExist(err) {
 			ctx.APIError(http.StatusNotFound, err)
@@ -236,7 +236,7 @@ func DeleteProject(ctx *context.APIContext) {
 	// ---
 	// summary: Delete project
 	// parameters:
-	//   - name: id
+	//   - name: project_id
 	//     in: path
 	//     description: id of the project
 	//     type: string
@@ -249,7 +249,7 @@ func DeleteProject(ctx *context.APIContext) {
 	//  "404":
 	//    "$ref": "#/responses/notFound"
 
-	if err := project_model.DeleteProjectByID(ctx, ctx.FormInt64("project_id")); err != nil {
+	if err := project_model.DeleteProjectByID(ctx, ctx.PathParamInt64("project_id")); err != nil {
 		ctx.APIErrorInternal(err)
 		return
 	}
@@ -264,6 +264,11 @@ func ListUserProjects(ctx *context.APIContext) {
 	// produces:
 	// - application/json
 	// parameters:
+	//   - name: user
+	//     in: path
+	//     description: username of user
+	//     type: string
+	//     required: true
 	//   - name: closed
 	//     in: query
 	//     description: include closed projects or not
