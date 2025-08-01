@@ -1477,6 +1477,7 @@ func Routes() *web.Router {
 				m.Methods("HEAD,GET", "/{ball_type:tarball|zipball|bundle}/*", reqRepoReader(unit.TypeCode), repo.DownloadArchive)
 
 				m.Group("/projects", func() {
+					m.Get("", projects.ListUserProjects)
 					m.Post("", bind(api.NewProjectOption{}), projects.CreateRepoProject)
 				}, tokenRequiresScopes(auth_model.AccessTokenScopeCategoryProject))
 			}, repoAssignment(), checkTokenPublicOnly())
@@ -1728,9 +1729,9 @@ func Routes() *web.Router {
 
 		// Projects
 		m.Group("/projects", func() {
-			m.Get("{project_id}", projects.GetProject)
-			m.Patch("{project_id}", bind(api.UpdateProjectOption{}), projects.UpdateProject)
-			m.Delete("{project_id}", projects.DeleteProject)
+			m.Get("/{project_id}", projects.GetProject)
+			m.Patch("/{project_id}", bind(api.UpdateProjectOption{}), projects.UpdateProject)
+			m.Delete("/{project_id}", projects.DeleteProject)
 		}, tokenRequiresScopes(auth_model.AccessTokenScopeCategoryProject), reqToken())
 
 		m.Group("/admin", func() {
