@@ -42,6 +42,20 @@ const (
 	TypeOrganization
 )
 
+// ToString returns the string representation of the project type
+func (t Type) ToString() string {
+	switch t {
+	case TypeIndividual:
+		return "individual"
+	case TypeRepository:
+		return "repository"
+	case TypeOrganization:
+		return "organization"
+	default:
+		return "unknown"
+	}
+}
+
 // ErrProjectNotExist represents a "ProjectNotExist" kind of error.
 type ErrProjectNotExist struct {
 	ID     int64
