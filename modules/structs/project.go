@@ -56,4 +56,5 @@ type Project struct {
 	Repo    *RepositoryMeta `json:"repository"`
 	Creator *User           `json:"creator"`
 	Owner   *User           `json:"owner"`
+	Type    string          `json:"type"`
 }

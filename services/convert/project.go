@@ -13,12 +13,14 @@ import (
 
 func ToAPIProject(ctx context.Context, project *project_model.Project) (*api.Project, error) {
 	apiProject := &api.Project{
+		ID:           project.ID,
 		Name:         project.Title,
 		Body:         project.Description,
 		TemplateType: project.TemplateType.ToString(),
 		State:        util.Iif(project.IsClosed, "closed", "open"),
 		Created:      project.CreatedUnix.AsTime(),
 		Updated:      project.UpdatedUnix.AsTime(),
+		Type:         project.Type.ToString(),
 	}
 	if !project.ClosedDateUnix.IsZero() {
 		tm := project.ClosedDateUnix.AsTime()
