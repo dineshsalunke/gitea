@@ -98,7 +98,7 @@ func TestAPIListUserProjects(t *testing.T) {
 
 	resp := MakeRequest(t, req, http.StatusOK)
 	DecodeJSON(t, resp, &apiProjects)
-	assert.Len(t, apiProjects, 1)
+	assert.Len(t, apiProjects, 3)
 }
 
 func TestAPIListOrgProjects(t *testing.T) {
@@ -129,7 +129,7 @@ func TestAPIListRepoProjects(t *testing.T) {
 
 	resp := MakeRequest(t, req, http.StatusOK)
 	DecodeJSON(t, resp, &apiProjects)
-	assert.Len(t, apiProjects, 1)
+	assert.Len(t, apiProjects, 3)
 }
 
 func TestAPIGetProject(t *testing.T) {
